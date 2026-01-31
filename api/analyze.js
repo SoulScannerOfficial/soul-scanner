@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         const apiKey = process.env.SOULSCANNER;
 
         // 3. 準備發給 Google 的數據 (已升級為 2.5-flash)
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         
         const systemPrompt = `
           Analyze this dialogue for "Mask X-Ray". 
