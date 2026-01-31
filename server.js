@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-const API_KEY = process.env.GEMINI_API_KEY;
+const API_KEY = process.env.SOULSCANNER;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
 app.use(cors());
@@ -177,4 +177,5 @@ app.post('/api/analyze', async (req, res) => {
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
 
 app.listen(PORT, () => { console.log(`🚀 Soul Scanner (Gold Master) running on port ${PORT}`); });
+
 
