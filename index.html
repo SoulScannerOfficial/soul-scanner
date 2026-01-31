@@ -227,6 +227,11 @@
             Privacy First: Data stays on your device. 
             <span class="clear-btn" onclick="clearLocalData()">[Clear Data]</span>
         </div>
+        <div style="margin-top: 8px;">
+            <a href="mailto:soulscanner.official@gmail.com" style="color: #999; text-decoration: none; font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">
+                soulscanner.official@gmail.com
+            </a>
+        </div>
     </footer>
 <div style="text-align: center; margin-top: 10px; margin-bottom: 50px; opacity: 0.8;">
         <p style="font-family: 'Noto Serif', serif; font-size: 0.75rem; color: #999; margin-bottom: 10px; letter-spacing: 1px;">
@@ -384,33 +389,24 @@
             p.onclick = (e) => { e.stopPropagation(); handleCoreClick(i); };
             g.appendChild(p);
 
-            // Label
-           // Label
-if (span > 25) {
-    const mid = startAngle + span/2;
+            // Label (Fixed & Centered)
+            if (span > 25) {
+                const mid = startAngle + span/2;
 
-    // 🔥 FIX: Dynamic radius adjustment based on angle for perfect centering
-    let labelRadius = R_CORE * 0.6; // Default position
-    // If it's more "vertical" (top/bottom), push it out slightly
-    if ((mid > 45 && mid < 135) || (mid > 225 && mid < 315)) {
-        labelRadius = R_CORE * 0.68; // Push out ~13%
-    }
-    // If it's more "horizontal" (left/right), pull it in slightly
-    else {
-        labelRadius = R_CORE * 0.55; // Pull in ~8%
-    }
+                // 🔥 FIX: Dynamic radius adjustment based on angle for perfect centering
+                let labelRadius = R_CORE * 0.6; // Default position
+                // If it's more "vertical" (top/bottom), push it out slightly
+                if ((mid > 45 && mid < 135) || (mid > 225 && mid < 315)) {
+                    labelRadius = R_CORE * 0.68; // Push out ~13%
+                }
+                // If it's more "horizontal" (left/right), pull it in slightly
+                else {
+                    labelRadius = R_CORE * 0.55; // Pull in ~8%
+                }
 
-    // Use the new dynamic radius
-    const pos = polarToCartesian(CENTER, CENTER, labelRadius, mid);
-    
-    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    txt.setAttribute("x", pos.x); txt.setAttribute("y", pos.y);
-    txt.setAttribute("class", "center-text");
-    txt.textContent = core.name;
-    // INCREASED FONT SIZE for readability
-    txt.style.fontSize = isFocused ? "24px" : "16px";
-    g.appendChild(txt);
-}
+                // Use the new dynamic radius
+                const pos = polarToCartesian(CENTER, CENTER, labelRadius, mid);
+                
                 const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 txt.setAttribute("x", pos.x); txt.setAttribute("y", pos.y);
                 txt.setAttribute("class", "center-text");
@@ -688,6 +684,7 @@ if (span > 25) {
 
 </body>
 </html>
+
 
 
 
