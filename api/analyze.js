@@ -1,94 +1,33 @@
-export const config = {
-    maxDuration: 60, // 延長超時時間，防止 AI 思考太久報錯
-};
-
 export default async function handler(req, res) {
-    // 1. 處理 CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
+    // 1. 設置基礎標頭
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Content-Type', 'application/json');
 
+    // 2. 處理 OPTIONS 請求 (瀏覽器預檢)
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        return res.status(200).end();
     }
 
     try {
-        const { conversation, language, userEmotion } = req.body;
-
-        // 2. 檢查 API Key (這裡是關鍵)
+        // 3. 檢查 API Key 是否存在 (這是關鍵測試點！)
         const apiKey = process.env.SOULSCANNER;
-        if (!apiKey) {
-            console.error("CRITICAL ERROR: API Key is missing in server environment!");
-            return res.status(500).json({ error: 'Server Configuration Error: Missing API Key' });
-        }
+        const keyStatus = apiKey ? "✅ 鑰匙已讀取" : "❌ 鑰匙丟失";
+        const keyPreview = apiKey ? apiKey.substring(0, 5) + "..." : "None";
 
-        // 3. 定義 Prompt
-        const systemPrompt = `
-          You are Soul Scanner, an AI cognitive prosthesis.
-          Analyze this dialogue for "Mask X-Ray".
-          Output strictly in JSON format. Do not use Markdown code blocks.
-          
-          JSON Structure:
-          {
-            "riskScore": (number 1-10),
-            "patterns": ["tag1", "tag2"],
-            "explanation": "Short analysis.",
-            "strategicAdvice": "One tactic.",
-            "radarData": [0,0,0,0,0,0]
-          }
-          User Context: ${userEmotion || 'uncertain'}
-        `;
+        // 4. 不調用 Google，直接返回一個「假結果」
+        // 這會讓前端以為 AI 已經分析完了，並顯示出來
+        const fakeResult = {
+            riskScore: 1,
+            patterns: ["DEBUG_MODE", "CONNECTION_TEST"],
+            explanation: `【系統自檢報告】\n服務器連接：正常。\nAPI Key狀態：${keyStatus} (${keyPreview})。\n如果看到這段話，說明你的 Vercel 是完全健康的，問題出在 Google Gemini API 的調用上。`,
+            strategicAdvice: "請截圖告訴我這段話顯示了什麼，我們就能鎖定最後的兇手。",
+            radarData: [5, 5, 5, 5, 5, 5]
+        };
 
-        // 4. 調用 Google API
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: systemPrompt + "\n\nDialogue:\n" + conversation }]
-                    }]
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error("Gemini API Error Details:", JSON.stringify(data));
-            return res.status(500).json({ error: 'AI Service Error', details: data });
-        }
-
-        // 5. 解析結果 (防彈邏輯)
-        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (!aiText) {
-             console.error("AI returned empty response (Safety Block?)");
-             return res.status(500).json({ error: 'AI Safety Block - Content filtered' });
-        }
-
-        // 提取 JSON (無論 AI 說了什麼廢話，只抓取 {} 之間的內容)
-        const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-            console.error("AI output invalid JSON:", aiText);
-            throw new Error("Invalid JSON format from AI");
-        }
-        
-        const result = JSON.parse(jsonMatch[0]);
-        return res.status(200).json(result);
+        return res.status(200).json(fakeResult);
 
     } catch (error) {
-        console.error("Server Crash:", error);
-        return res.status(500).json({ error: 'Internal Processing Error', message: error.message });
+        return res.status(500).json({ error: 'Server Error', details: error.message });
     }
 }
