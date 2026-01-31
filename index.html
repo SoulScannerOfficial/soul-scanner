@@ -200,8 +200,9 @@
                 <span style="text-decoration: underline; cursor: pointer;" onclick="alert('Data is processed anonymously. No PII is stored. This helps us build better filters for gaslighting.')">(?)</span>
             </label>
         </div>
+
         <button class="btn-scan" id="scanBtn" onclick="runAnalysis()">Initiate Analysis</button>
-       
+
         <div class="result-area" id="resultArea">
             <div style="text-align:center; margin-bottom:20px;">
                 <span id="riskScore" style="background:#FEE2E2; color:#B91C1C; padding:4px 12px; border-radius:20px; font-weight:bold;"></span>
@@ -212,6 +213,7 @@
             <div class="tag-cloud" id="tagCloud"></div>
             <div id="analysisText"></div>
             <div id="strategyText" style="margin-top:20px;"></div>
+            
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
                 <button onclick="triggerWaitlist('Legal PDF Report')" style="background: white; border: 1px solid #1C1917; color: #1C1917; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.8rem; letter-spacing: 1px; transition: all 0.2s;">
                     📄 DOWNLOAD LEGAL/PSYCH REPORT (PDF)
@@ -233,7 +235,8 @@
             </a>
         </div>
     </footer>
-<div style="text-align: center; margin-top: 10px; margin-bottom: 50px; opacity: 0.8;">
+
+    <div style="text-align: center; margin-top: 10px; margin-bottom: 50px; opacity: 0.8;">
         <p style="font-family: 'Noto Serif', serif; font-size: 0.75rem; color: #999; margin-bottom: 10px; letter-spacing: 1px;">
             Powered by caffeine and trauma.
         </p>
@@ -241,6 +244,7 @@
             ☕ Support Server Costs
         </a>
     </div>
+
     <div id="waitlistModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
         <div style="background: #FFF9F2; width: 90%; max-width: 400px; padding: 30px; border-radius: 12px; position: relative; border: 1px solid #1C1917; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
             <span onclick="document.getElementById('waitlistModal').style.display='none'" style="position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.5rem; opacity: 0.5;">&times;</span>
@@ -248,9 +252,9 @@
             <div style="text-align: center; margin-bottom: 20px;">
                 <div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>
                 <h3 style="margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px;">Access Restricted</h3>
-            <p style="font-size: 0.8rem; color: #666; margin-top: 10px; line-height: 1.5;">
-    The <span id="featureName" style="font-weight: bold; color: #000;">feature</span> module is currently restricted to the <br><strong>Clinical Research Cohort</strong>.
-</p>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 10px; line-height: 1.5;">
+                    The <span id="featureName" style="font-weight: bold; color: #000;">feature</span> module is currently restricted to the <br><strong>Clinical Research Cohort</strong>.
+                </p>
             </div>
 
             <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -264,6 +268,7 @@
             </div>
         </div>
     </div>
+
 <script>
     // --- 1. Language Data ---
     const I18N = {
@@ -362,6 +367,7 @@
         return d.join(" ");
     }
 
+    // 🔥 FIX: Cleaned up renderWheel with fixed text positioning to prevent overlap
     function renderWheel() {
         const svg = document.getElementById('wheelSvg');
         svg.innerHTML = '';
@@ -389,30 +395,28 @@
             p.onclick = (e) => { e.stopPropagation(); handleCoreClick(i); };
             g.appendChild(p);
 
-            // Label (Fixed & Centered)
+            // Label (FIXED: Pushed out to 0.75 radius for max spacing)
             if (span > 25) {
                 const mid = startAngle + span/2;
+                
+                // Use a safe fixed radius that works for all languages
+                // 0.75 pushes it to the outer edge of the core circle where there is more width
+                const labelRadius = R_CORE * 0.75; 
 
-                // 🔥 FIX: Dynamic radius adjustment based on angle for perfect centering
-                let labelRadius = R_CORE * 0.6; // Default position
-                // If it's more "vertical" (top/bottom), push it out slightly
-                if ((mid > 45 && mid < 135) || (mid > 225 && mid < 315)) {
-                    labelRadius = R_CORE * 0.68; // Push out ~13%
-                }
-                // If it's more "horizontal" (left/right), pull it in slightly
-                else {
-                    labelRadius = R_CORE * 0.55; // Pull in ~8%
-                }
-
-                // Use the new dynamic radius
                 const pos = polarToCartesian(CENTER, CENTER, labelRadius, mid);
                 
                 const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 txt.setAttribute("x", pos.x); txt.setAttribute("y", pos.y);
                 txt.setAttribute("class", "center-text");
+                // Center strictly
+                txt.setAttribute("text-anchor", "middle");
+                txt.setAttribute("dominant-baseline", "middle");
+                
                 txt.textContent = core.name;
-                // INCREASED FONT SIZE for readability
-                txt.style.fontSize = isFocused ? "24px" : "16px";
+                // Font size logic
+                txt.style.fontSize = isFocused ? "24px" : "14px";
+                txt.style.fill = "#FFF9F2"; // Ensure good contrast
+                txt.style.pointerEvents = "none"; // Make sure clicks go through to the path
                 g.appendChild(txt);
             }
 
@@ -438,8 +442,9 @@
                     const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
                     txt.setAttribute("x", pos.x); txt.setAttribute("y", pos.y);
                     txt.setAttribute("class", "center-text");
+                    txt.setAttribute("text-anchor", "middle");
+                    txt.setAttribute("dominant-baseline", "middle");
                     txt.textContent = branch.name;
-                    // INCREASED FONT SIZE
                     txt.style.fontSize = "16px"; 
                     let rot = mid; if(mid>90 && mid<270) rot += 180;
                     txt.setAttribute("transform", `rotate(${rot}, ${pos.x}, ${pos.y})`);
@@ -463,8 +468,9 @@
                         const lTxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
                         lTxt.setAttribute("x", lPos.x); lTxt.setAttribute("y", lPos.y);
                         lTxt.setAttribute("class", "center-text");
+                        lTxt.setAttribute("text-anchor", "middle");
+                        lTxt.setAttribute("dominant-baseline", "middle");
                         lTxt.textContent = leaf;
-                        // INCREASED FONT SIZE
                         lTxt.style.fontSize = "14px"; 
                         lTxt.style.fill = "#333";
                         let lRot = lMid; if(lMid>90 && lMid<270) lRot += 180;
@@ -505,7 +511,7 @@
         renderWheel();
     }
 
-    // --- 3. Analysis & Storage (FIXED FETCH URL) ---
+    // --- 3. Analysis & Storage (FIXED for Rate Limiting) ---
     async function runAnalysis() {
         const text = document.getElementById('dialogueInput').value;
         if (!text) return alert("Empty input!");
@@ -515,8 +521,6 @@
         btn.disabled = true;
 
         try {
-            // FIX: Changed from http://localhost:3000/api/analyze to /api/analyze
-            // This is crucial for Vercel deployment.
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -529,10 +533,14 @@
             
             const data = await response.json();
             
-            if (response.status === 429) {
-                alert(data.error);
-                return;
+            // 🔥 RATE LIMIT HANDLING 🔥
+            if (response.status === 429 || response.status === 503) {
+                alert("⚠️ System Overheat: Neural Network is cooling down. Please wait 10 seconds and try again.");
+                btn.innerText = "COOLDOWN... TRY AGAIN";
+                return; // Stop execution
             }
+
+            if (!response.ok) throw new Error("API Error");
 
             // Save to LocalStorage
             const savedData = {
@@ -549,9 +557,12 @@
 
         } catch (e) {
             console.error(e);
-            alert("Connection Error. Please try again.");
+            alert("Connection interrupted. The AI might be busy. Please try again in a moment.");
         } finally {
-            btn.innerText = I18N[currentLang].btn;
+            // Restore button only if we didn't hit a permanent error
+            if (btn.innerText !== "COOLDOWN... TRY AGAIN") {
+                btn.innerText = I18N[currentLang].btn;
+            }
             btn.disabled = false;
         }
     }
@@ -632,10 +643,10 @@
     }
 
     init();
-// --- 4. Shadow Business Logic (Waitlist & Interceptors) ---
+
+    // --- 4. Shadow Business Logic (Waitlist & Interceptors) ---
 
     // Trigger for the Module Cards (Compass, Neutralizer, Bio-Logic)
-    // Runs automatically to attach click events to the top icons
     document.querySelectorAll('.module-card').forEach((card, index) => {
         // Skip the first one (Mask X-Ray) because it's active
         if (index > 0) {
@@ -684,8 +695,3 @@
 
 </body>
 </html>
-
-
-
-
-
