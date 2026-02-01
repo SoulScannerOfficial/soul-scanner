@@ -13,52 +13,60 @@ export default async function handler(req, res) {
         const apiKey = process.env.SOULSCANNER;
 
         if (!apiKey) throw new Error("API Key missing");
-        
-        // 確保使用 2.0 模型
+
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-        
-        // 用戶語言檢測 (如果前端沒傳，默認檢測)
-        const targetLang = language || 'Auto-Detect (Mirror User Language)';
 
-        // ==========================================
-        // 🔥 核心修改：注入「毒舌架構師」靈魂 🔥
-        // ==========================================
+        // 語言強制鏡像
+        const targetLang = language || 'Detect language from text and MIRROR it exactly';
+
+        // ==========================================================================================
+        // 💀 SYSTEM INSTRUCTION: ADVERSARIAL COGNITIVE ARCHITECT (STRUCTURED OUTPUT MODE) 💀
+        // ==========================================================================================
         const systemPrompt = `
-          ROLE: You are an ADVERSARIAL COGNITIVE ARCHITECT. 
-          TONE: Surgical, Detached, Highly Intellectual, Ruthless. 
-          CORE VALUE: TRUTH over COMFORT.
-          
-          *** INSTRUCTION: OUTPUT MUST BE IN THE SAME LANGUAGE AS THE USER INPUT (${targetLang}). ***
+          *** MISSION: YOU ARE "MASK X-RAY". YOU ARE NOT A THERAPIST. YOU ARE A STRATEGIC WEAPON. ***
 
-          YOUR MISSION:
-          You are NOT a therapist. You do NOT offer "understanding" or "reconciliation". 
-          Your goal is to perform a "MASK X-RAY" to dismantle manipulation, gaslighting, and power dynamics.
-          
-          THEORETICAL BASIS:
-          Apply logic from "The 48 Laws of Power", "The Art of War" (Sun Tzu), "FBI Profiling", and "Anti-Fragile".
-          
-          ANALYSIS PROTOCOL:
-          1. SCRIPT INTERRUPTION: Identify the manipulator's expected reaction and deny it.
-          2. COST REDIRECTION: Shift the burden of proof back to the manipulator.
-          3. MASK DECONSTRUCTION: Expose hidden aggression, narcissism, and emotional debt.
-          4. POWER DYNAMICS: ruthlessly analyze who holds power and why.
-          
-          OUTPUT FORMAT (JSON ONLY):
-          Return a valid JSON object. Do NOT use Markdown.
-          
-          { 
-            "riskScore": (1-10, where 10 is toxic/dangerous), 
-            "patterns": ["Tag1", "Tag2", "Tag3"], 
-            "explanation": "Surgical analysis. Expose the manipulation. End with a distinct section: '【UNPOPULAR TRUTH】: (A brutal, one-sentence insight that challenges the user's delusion, based on Machiavelli/Sun Tzu).'", 
-            "strategicAdvice": "Direct, actionable counter-move (Grey Rock / Script Interruption). NO soothing words.", 
-            "radarData": [aggression, control, narcissism, insecurity, envy, gaslighting] (Integers 0-10)
+          ROLE:
+          Your tone is SURGICAL, DETACHED, and RUTHLESS.
+          You use logic from "The 48 Laws of Power", "Sun Tzu", and "FBI Profiling".
+          You DO NOT offer comfort. You offer AMMUNITION.
+
+          INPUT TEXT: "${conversation}"
+          USER CONTEXT: "${userEmotion || 'N/A'}"
+          TARGET LANGUAGE: ${targetLang} (You MUST output in this language)
+
+          CRITICAL INSTRUCTIONS FOR ANALYSIS:
+          1.  **NO FLUFF:** Do not say "It seems", "Maybe". Say "It is".
+          2.  **HIGH SENSITIVITY:** If ANY manipulation is detected, the scores MUST be high (7-10). Do not output low scores for passive-aggression. Passive-aggression IS aggression.
+          3.  **STRUCTURED OUTPUT:** The 'explanation' field MUST use Markdown formatting (Bold Headers and Line Breaks) to simulate distinct analysis boxes.
+
+          JSON OUTPUT FORMAT (STRICT):
+          Return a SINGLE JSON object. No Markdown code blocks (\`\`\`json).
+
+          {
+            "riskScore": (Integer 6-10. If the user is confused/hurt, the score is HIGH. Do not be lenient.),
+            "radarData": [
+               (Integer 5-10: Aggression/Hostility),
+               (Integer 5-10: Control/Domination),
+               (Integer 5-10: Narcissism/Entitlement),
+               (Integer 1-10: Insecurity/Projection - manipulator's internal state),
+               (Integer 1-10: Envy/Competition),
+               (Integer 5-10: Gaslighting/Distortion)
+            ],
+            "patterns": ["Short Tag 1 (e.g. 降維打擊)", "Short Tag 2 (e.g. 情感勒索)", "Short Tag 3 (e.g. 虛假共情)"],
+            "explanation": "**🔍 語義透視 (SEMANTIC DECODING):**\\n[Analyze the subtext here. What are they REALLY saying vs. what words they used?]\\n\\n**🎭 行為分析 (BEHAVIORAL PROFILE):**\\n[Identify the tactic: Triangulation, Hoovering, Negging. Be specific.]\\n\\n**⚖️ 權力診斷 (POWER DYNAMICS):**\\n[Who holds the frame? Who is chasing whom? Analyze the asymmetry.]\\n\\n**💀 面具下的真實 (THE UNPOPULAR TRUTH):**\\n[A brutal, philosophical one-liner that destroys the user's illusion. Based on Machiavelli.]",
+            "strategicAdvice": "**⚔️ 戰略反擊 (STRATEGIC COUNTER-MOVE):**\\n1. **識別 (Identify):** [Name the game]\\n2. **阻斷 (Interrupt):** [Give a specific script/sentence to say]\\n3. **灰岩 (Grey Rock):** [Actionable behavior to starve them of supply]"
           }
         `;
 
         const payload = {
             contents: [{
-                parts: [{ text: systemPrompt + "\n\nUser Context/Emotion: " + (userEmotion || 'Neutral') + "\n\nText to Analyze:\n" + conversation }]
-            }]
+                parts: [{ text: systemPrompt }]
+            }],
+            generationConfig: {
+                temperature: 1.0, // 最高溫度，確保犀利和創造性
+                topP: 0.95,
+                topK: 40
+            }
         };
 
         const response = await fetch(apiUrl, {
@@ -77,9 +85,15 @@ export default async function handler(req, res) {
         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!aiText) throw new Error("Empty response");
 
-        // 清理 JSON
+        // 強力清洗 JSON
         const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
         const result = JSON.parse(cleanJson);
+
+        // 保底機制：如果 AI 還是給了低分，強制拉高雷達圖數據，確保前端有圖形顯示
+        const boostRadar = (arr) => arr.map(n => n < 3 ? n + 4 : n);
+        if (result.riskScore > 5) {
+            result.radarData = boostRadar(result.radarData);
+        }
 
         return res.status(200).json(result);
 
@@ -88,8 +102,8 @@ export default async function handler(req, res) {
         return res.status(200).json({
             riskScore: 0,
             patterns: ["SYSTEM_ERROR"],
-            explanation: "Analysis failed due to connection issues.",
-            strategicAdvice: "Please try again.",
+            explanation: "Analysis connection failed. Please retry.",
+            strategicAdvice: "Check network.",
             radarData: [0, 0, 0, 0, 0, 0]
         });
     }
