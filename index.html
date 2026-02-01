@@ -105,7 +105,7 @@
         .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 25px; }
         .tag { background: #F3F4F6; color: #374151; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; border: 1px solid #E5E5E5; }
 
-        /* ✨ AI CARD STYLING (The Magic Sauce) ✨ */
+        /* ✨ AI CARD STYLING (OCD Friendly) ✨ */
         .analysis-card {
             background: white;
             border: 1px solid #E5E5E5;
@@ -115,25 +115,37 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .analysis-header {
-            background: #F8FAFC;
+            background: #1C1917; /* Dark header */
+            color: #FFF9F2;
             padding: 10px 15px;
-            border-bottom: 1px solid #E5E5E5;
             font-weight: bold;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #475569;
             display: flex; align-items: center; gap: 8px;
         }
         .analysis-content {
-            padding: 15px;
+            padding: 20px;
             font-size: 0.95rem;
-            line-height: 1.6;
+            line-height: 1.7;
             color: #334155;
         }
-        .analysis-content strong { color: #000; font-weight: 700; }
-        .analysis-content ul { margin: 0; padding-left: 20px; }
-        .analysis-content li { margin-bottom: 8px; }
+        .analysis-content strong { 
+            color: #B91C1C; /* Highlight keywords in red */
+            font-weight: 700; 
+        }
+        .list-item {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+        }
+        .list-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #B91C1C;
+            font-weight: bold;
+        }
 
         /* Footer */
         footer {
@@ -149,7 +161,7 @@
             .wheel-stage { transform: scale(1.05); margin: 10px 0 30px 0; }
             .workspace { width: 95%; padding: 20px; }
             .radar-container { height: 240px; }
-            .analysis-content { font-size: 0.9rem; }
+            .analysis-content { font-size: 0.9rem; padding: 15px; }
         }
     </style>
 </head>
@@ -246,17 +258,24 @@
     };
 
     function getEmotions(lang) {
-        // Simplified emotion tree for brevity, maps to colors correctly
-        if(lang === 'zh_tw') return [
+        // Fallback structures
+        if(lang === 'zh_cn') return [
+            { name: "愤怒", color: "#EF4444", branches: [{name:"敌意", children:["憎恨","轻蔑"]}, {name:"受挫", children:["烦躁","嫉妒"]}, {name:"威胁", children:["防卫","不安"]}] },
+            { name: "恐惧", color: "#F59E0B", branches: [{name:"焦虑", children:["担忧","恐慌"]}, {name:"无力", children:["自卑","脆弱"]}, {name:"被拒", children:["受伤","羞耻"]}] },
+            { name: "快乐", color: "#10B981", branches: [{name:"满足", children:["平静","感恩"]}, {name:"自豪", children:["自信","价值"]}, {name:"链接", children:["爱","信任"]}] },
+            { name: "悲伤", color: "#3B82F6", branches: [{name:"失落", children:["空虚","遗憾"]}, {name:"抑郁", children:["麻木","无助"]}, {name:"愧疚", children:["自责","后悔"]}] },
+            { name: "惊讶", color: "#8B5CF6", branches: [{name:"困惑", children:["怀疑","犹豫"]}, {name:"震惊", children:["混乱","呆滞"]}, {name:"兴奋", children:["期待","急躁"]}] },
+            { name: "厌恶", color: "#6B7280", branches: [{name:"反感", children:["恶心","抗拒"]}, {name:"失望", children:["冷漠","放弃"]}, {name:"批判", children:["挑剔","鄙视"]}] }
+        ];
+        // Default TW/EN structure
+        return [
             { name: "憤怒", color: "#EF4444", branches: [{name:"敵意", children:["憎恨","輕蔑"]}, {name:"受挫", children:["煩躁","嫉妒"]}, {name:"威脅", children:["防衛","不安"]}] },
             { name: "恐懼", color: "#F59E0B", branches: [{name:"焦慮", children:["擔憂","恐慌"]}, {name:"無力", children:["自卑","脆弱"]}, {name:"被拒", children:["受傷","羞恥"]}] },
-            { name: "快樂", color: "#10B981", branches: [{name:"滿足", children:["平靜","感恩"]}, {name:"自豪", children:["自信","價值"]}, {name:"連結", children:["信任","同理"]}] },
+            { name: "快樂", color: "#10B981", branches: [{name:"滿足", children:["平靜","感恩"]}, {name:"自豪", children:["自信","價值"]}, {name:"連結", children:["愛","信任"]}] },
             { name: "悲傷", color: "#3B82F6", branches: [{name:"失落", children:["空虛","遺憾"]}, {name:"抑鬱", children:["麻木","無助"]}, {name:"愧疚", children:["自責","後悔"]}] },
             { name: "驚訝", color: "#8B5CF6", branches: [{name:"困惑", children:["懷疑","猶豫"]}, {name:"震驚", children:["混亂","呆滯"]}, {name:"興奮", children:["期待","急躁"]}] },
             { name: "厭惡", color: "#6B7280", branches: [{name:"反感", children:["噁心","抗拒"]}, {name:"失望", children:["冷漠","放棄"]}, {name:"批判", children:["挑剔","鄙視"]}] }
         ];
-        // Fallback / other langs follow same structure
-        return I18N['zh_tw'].emotions; // Default to TW structure for demo if others not fully expanded in this snippet
     }
 
     // --- 2. Geometry Engine (Wheel) ---
@@ -317,46 +336,45 @@
         });
     }
 
-    // --- 3. Markdown Renderer (THE MAGIC) ---
+    // --- 3. Markdown Parser (THE CLEANUP CREW) ---
+    // This function acts as a translator to hide symbols and create cards
     function renderMarkdown(text) {
         if (!text) return "";
-        // Convert ### Title to Cards
-        // We split by "###" to find sections
-        const sections = text.split('###');
+        
+        // 1. Split text into sections based on "###" headers
+        // We filter out empty splits to avoid blank cards
+        const sections = text.split('###').filter(section => section.trim().length > 0);
+        
         let html = "";
         
         sections.forEach(section => {
             section = section.trim();
-            if (!section) return;
+            // Separate Title (first line) from Content
+            const lines = section.split('\n');
+            const title = lines.shift().trim(); // First line is title
+            let content = lines.join('\n').trim(); // Rest is content
             
-            // Split title from content (first newline)
-            const firstLineBreak = section.indexOf('\n');
-            let title = "", content = "";
-            
-            if (firstLineBreak === -1) {
-                title = section; // Just a title?
-            } else {
-                title = section.substring(0, firstLineBreak).trim();
-                content = section.substring(firstLineBreak).trim();
-            }
-            
-            // Format bold text (**text**)
+            // 2. Format Content: Remove symbols, add HTML
+            // Bold: **text** -> <strong>text</strong>
             content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Format bullets (* text)
-            content = content.replace(/^\* (.*)/gm, '<li>$1</li>');
-            // Wrap bullets in ul if multiple
-            if (content.includes('<li>')) {
-                content = content.replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
-            }
-            // Line breaks for paragraphs
-            content = content.replace(/\n\n/g, '<br><br>');
+            
+            // Bullets: * text -> <div class="list-item">text</div>
+            // This regex finds lines starting with "* " and wraps them
+            content = content.replace(/^\*\s+(.*)$/gm, '<div class="list-item">$1</div>');
+            
+            // Line breaks
+            content = content.replace(/\n/g, '<br>');
 
+            // 3. Wrap in Card Structure
             html += `
             <div class="analysis-card">
-                <div class="analysis-header">${title}</div>
+                <div class="analysis-header">
+                   <span>🔍</span> ${title}
+                </div>
                 <div class="analysis-content">${content}</div>
             </div>`;
         });
+        
         return html;
     }
 
@@ -369,7 +387,6 @@
         btn.innerText = I18N[currentLang].scanning; btn.disabled = true;
 
         try {
-            // Mock API call for Demo if local, replace with real fetch
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -382,9 +399,10 @@
             document.getElementById('riskScore').innerText = `TOXIC SCORE: ${data.riskScore}/10`;
             document.getElementById('tagCloud').innerHTML = data.patterns.map(t => `<span class="tag">#${t}</span>`).join('');
             
-            // RENDER MARKDOWN HERE
-            const fullAnalysis = (data.explanation || "") + "\n\n" + (data.strategicAdvice || "");
-            document.getElementById('analysisText').innerHTML = renderMarkdown(fullAnalysis);
+            // COMBINE EXPLANATION + STRATEGY
+            // Then pass through the Markdown Parser
+            const fullText = (data.explanation || "") + "\n\n" + (data.strategicAdvice || "");
+            document.getElementById('analysisText').innerHTML = renderMarkdown(fullText);
 
             // Radar Chart
             renderRadar(data.radarData);
@@ -436,6 +454,7 @@
         document.getElementById(`l-${l}`).classList.add('active');
         document.getElementById('dialogueInput').placeholder = I18N[l].placeholder;
         document.getElementById('scanBtn').innerText = I18N[l].btn;
+        currentData = getEmotions(l); // Update wheel data
         renderWheel();
     }
 
@@ -443,7 +462,7 @@
     setLang('en');
     renderWheel();
     
-    // Module Click Handlers (Waitlist)
+    // Module Click Handlers
     document.querySelectorAll('.module-card').forEach((c,i) => {
         if(i>0) c.onclick = () => alert("This module is locked for the Research Cohort.");
     });
