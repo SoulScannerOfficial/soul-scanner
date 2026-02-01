@@ -17,56 +17,121 @@ export default async function handler(req, res) {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
         // ==========================================================================================
-        // 📚 THE 16-BOOK KNOWLEDGE BASE (IP CORE)
+        // 🌍 LANGUAGE ROUTER (THE FIX)
+        // 根據前端傳來的 language 參數，動態生成對應語言的 Prompt 模板
+        // ==========================================================================================
+        
+        // 默認英語，防止 undefined
+        const safeLang = language || 'en';
+
+        const LANG_CONFIG = {
+            'fr': {
+                role: "Vous êtes 'MASK X-RAY', une arme stratégique d'analyse cognitive.",
+                target: "Français (French)",
+                headers: {
+                    semantic: "👁️ DÉCODAGE SÉMANTIQUE",
+                    behavior: "🎭 PROFIL COMPORTEMENTAL",
+                    power: "⚖️ DYNAMIQUE DE POUVOIR",
+                    truth: "💀 LA VÉRITÉ BRUTALE (UNPOPULAR TRUTH)",
+                    strategy: "⚔️ CONTRE-STRATÉGIE"
+                },
+                tags_example: '["Dévalorisation", "Manipulation", "Gaslighting"]',
+                rule: "Répondez STRICTEMENT en Français. Ne jamais utiliser l'anglais ou le chinois."
+            },
+            'zh_cn': {
+                role: "你是 'MASK X-RAY'，一把認知手術刀。",
+                target: "Simplified Chinese (简体中文)",
+                headers: {
+                    semantic: "👁️ 语义透视",
+                    behavior: "🎭 行为侧写",
+                    power: "⚖️ 权力诊断",
+                    truth: "💀 面具下的真实 (UNPOPULAR TRUTH)",
+                    strategy: "⚔️ 战略反击"
+                },
+                tags_example: '["降维打击", "情感勒索", "煤气灯效应"]',
+                rule: "必须使用简体中文回答。"
+            },
+            'zh_tw': {
+                role: "你是 'MASK X-RAY'，一把認知手術刀。",
+                target: "Traditional Chinese (繁體中文)",
+                headers: {
+                    semantic: "👁️ 語義透視",
+                    behavior: "🎭 行為側寫",
+                    power: "⚖️ 權力診斷",
+                    truth: "💀 面具下的真實 (UNPOPULAR TRUTH)",
+                    strategy: "⚔️ 戰略反擊"
+                },
+                tags_example: '["降維打擊", "情感勒索", "煤氣燈效應"]',
+                rule: "必須使用繁體中文回答。"
+            },
+            'en': {
+                role: "You are 'MASK X-RAY', a strategic cognitive weapon.",
+                target: "English",
+                headers: {
+                    semantic: "👁️ SEMANTIC DECODING",
+                    behavior: "🎭 BEHAVIORAL PROFILE",
+                    power: "⚖️ POWER DYNAMICS",
+                    truth: "💀 THE UNPOPULAR TRUTH",
+                    strategy: "⚔️ STRATEGIC COUNTER-MOVE"
+                },
+                tags_example: '["Devaluation", "Triangulation", "Gaslighting"]',
+                rule: "Answer STRICTLY in English."
+            }
+        };
+
+        // 獲取當前語言配置，如果找不到就回退到英文
+        const config = LANG_CONFIG[safeLang] || LANG_CONFIG['en'];
+
+        // ==========================================================================================
+        // 📚 THE 16-BOOK KNOWLEDGE BASE (Pure Logic, No Language Bias)
         // ==========================================================================================
         const knowledgeBase = `
-        CORE KNOWLEDGE BASE (APPLY THESE THEORIES RUTHLESSLY):
-        [DEFENSE & PSYCHOLOGY]
-        1. "The Betrayal Bond" (Carnes): Trauma bonds.
-        2. "The Covert Passive-Aggressive Narcissist" (Mirza): Hidden insults.
-        3. "Emotional Blackmail" (Forward): FOG (Fear, Obligation, Guilt).
-        4. "The Gaslight Effect" (Stern): Reality distortion.
-        5. "The Body Keeps the Score" (van der Kolk): Somatic traps.
-        6. "The Highly Sensitive Person" (Aron): Sensory weaponization.
-        7. "Stop Walking on Eggshells" (Kreger): BPD/NPD dynamics.
-        8. "From Surviving to Thriving" (Walker): Flashback management.
-
-        [STRATEGY & WARFARE]
-        9. "The Art of War" (Sun Tzu): Asymmetric warfare.
-        10. "The Book of Five Rings" (Musashi): Cutting through illusion.
-        11. "Antifragile" (Taleb): Gaining from chaos.
-        12. "What Every Body Is Saying" (Navarro): Subtext decoding.
-        13. "Thinking in Bets" (Duke): Probability vs Emotion.
-        14. "The Power of Silence": Silence as a weapon.
-        15. "Asymmetric Warfare": Intelligence against brute force.
-        16. "The Gray Rock Method": Strategic boredom.
+        CORE KNOWLEDGE BASE:
+        1. "The Betrayal Bond" (Carnes)
+        2. "The Covert Passive-Aggressive Narcissist" (Mirza)
+        3. "Emotional Blackmail" (Forward)
+        4. "The Gaslight Effect" (Stern)
+        5. "The Body Keeps the Score" (van der Kolk)
+        6. "The Highly Sensitive Person" (Aron)
+        7. "Stop Walking on Eggshells" (Kreger)
+        8. "From Surviving to Thriving" (Walker)
+        9. "The Art of War" (Sun Tzu)
+        10. "The Book of Five Rings" (Musashi)
+        11. "Antifragile" (Taleb)
+        12. "What Every Body Is Saying" (Navarro)
+        13. "Thinking in Bets" (Duke)
+        14. "The Power of Silence"
+        15. "Asymmetric Warfare"
+        16. "The Gray Rock Method"
         `;
 
         // ==========================================================================================
-        // 💀 SYSTEM INSTRUCTION: LANGUAGE LOCKED & STRUCTURED 💀
+        // 💀 DYNAMIC SYSTEM INSTRUCTION 💀
         // ==========================================================================================
         const systemPrompt = `
-          *** CRITICAL PROTOCOL: YOU ARE "MASK X-RAY". ***
+          *** CRITICAL PROTOCOL: LANGUAGE MODE = ${config.target} ***
           
-          ROLE:
-          You are a Machiavellian Strategist. Your tone is SURGICAL, COLD, and RUTHLESS.
-          You value TRUTH over COMFORT.
+          ROLE: ${config.role}
+          TONE: SURGICAL, COLD, RUTHLESS. TRUTH OVER COMFORT.
           
           ${knowledgeBase}
 
           INPUT TEXT: "${conversation}"
           USER CONTEXT: "${userEmotion || 'N/A'}"
           
-          *** 🛑 LANGUAGE ENFORCEMENT PROTOCOL (MUST FOLLOW) 🛑 ***
-          1. DETECT the language of the INPUT TEXT. (e.g., Traditional Chinese, Simplified Chinese, English, French).
-          2. YOUR ENTIRE JSON OUTPUT MUST BE IN THAT EXACT DETECTED LANGUAGE.
-          3. DO NOT output English unless the input is English. 
-          4. If input is "S在讀MCGILL", output MUST be Traditional Chinese.
+          *** STRICT OUTPUT RULES ***
+          1. **LANGUAGE LOCK:** YOUR ENTIRE JSON OUTPUT MUST BE IN ${config.target}. 
+             - If the target is French, keys remain English (like 'riskScore'), but VALUES must be French.
+             - Do NOT mix languages.
+          2. **HEADERS:** You MUST use the exact headers provided below in the explanation structure.
+          3. **NO FLUFF:** Start directly with the diagnosis.
 
-          ANALYSIS RULES:
-          1. **NO FLUFF:** Start directly with the diagnosis.
-          2. **USE THE BOOKS:** Cite the concepts (e.g., "Hoovering", "Triangulation") but explain them in the target language.
-          3. **FORMATTING:** You MUST use Markdown headers (###) and bullet points to create a "Visual Framework".
+          REQUIRED HEADERS (Use these EXACT strings in your Markdown):
+          - ${config.headers.semantic}
+          - ${config.headers.behavior}
+          - ${config.headers.power}
+          - ${config.headers.truth}
+          - ${config.headers.strategy}
 
           JSON OUTPUT FORMAT (STRICT):
           Return a SINGLE JSON object. 
@@ -81,9 +146,9 @@ export default async function handler(req, res) {
                (Integer 5-10: Envy),
                (Integer 6-10: Gaslighting)
             ],
-            "patterns": ["Tag1 (In Target Lang)", "Tag2", "Tag3"],
-            "explanation": "### 👁️ 語義透視 (SEMANTIC DECODING)\\n* **[Concept 1]:** Analysis...\\n* **[Concept 2]:** Analysis...\\n\\n### 🎭 行為側寫 (BEHAVIORAL PROFILE)\\n* **[Tactic Name]:** Explain using 16-book theory...\\n\\n### ⚖️ 權力診斷 (POWER DYNAMICS)\\n* **[Status]:** Who holds the frame?\\n\\n### 💀 面具下的真實 (THE UNPOPULAR TRUTH)\\n**[A brutal, philosophical one-liner that destroys the user's illusion.]**",
-            "strategicAdvice": "### ⚔️ 戰略反擊 (STRATEGIC COUNTER-MOVE)\\n**1. 識別 (Identify):** [Name the game]\\n\\n**2. 阻斷 (Interrupt):** \"[Give a specific script]\"\\n\\n**3. 灰岩 (Grey Rock):** [Specific action]"
+            "patterns": ${config.tags_example},
+            "explanation": "### ${config.headers.semantic}\\n* **[Concept]:** Analysis in ${config.target}...\\n\\n### ${config.headers.behavior}\\n* **[Tactic]:** Analysis in ${config.target}...\\n\\n### ${config.headers.power}\\n* **[Status]:** Analysis in ${config.target}...\\n\\n### ${config.headers.truth}\\n**[Brutal truth in ${config.target}]**",
+            "strategicAdvice": "1. **Identify:** Analysis...\\n2. **Interrupt:** Script...\\n3. **Grey Rock:** Action..."
           }
         `;
 
@@ -114,11 +179,10 @@ export default async function handler(req, res) {
         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!aiText) throw new Error("Empty response");
 
-        // 強力清洗 JSON
         const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
         const result = JSON.parse(cleanJson);
 
-        // 保底機制：確保雷達圖數值夠高，撐開圖表
+        // 保底機制
         const boostRadar = (arr) => arr.map(n => n < 6 ? n + 3 : n);
         if (result.riskScore > 6) {
             result.radarData = boostRadar(result.radarData);
@@ -130,8 +194,8 @@ export default async function handler(req, res) {
         console.error("Server Error:", error);
         return res.status(200).json({
             riskScore: 0,
-            patterns: ["SYSTEM_ERROR"],
-            explanation: "Analysis connection failed. Please retry.",
+            patterns: ["ERROR"],
+            explanation: "Connection failed. Please try again.",
             strategicAdvice: "Check network.",
             radarData: [0, 0, 0, 0, 0, 0]
         });
