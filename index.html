@@ -118,7 +118,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .analysis-header {
-            background: #1C1917; /* Dark header */
+            background: #1C1917; 
             color: #FFF9F2;
             padding: 12px 20px;
             font-weight: bold;
@@ -128,14 +128,8 @@
             display: flex; align-items: center; gap: 8px;
         }
         
-        /* Special Style for Unpopular Truth */
-        .analysis-card.truth-card {
-            border: 1px solid #B91C1C;
-        }
-        .analysis-card.truth-card .analysis-header {
-            background: #450a0a; /* Dark Red */
-            color: #FECACA;
-        }
+        .analysis-card.truth-card { border: 1px solid #B91C1C; }
+        .analysis-card.truth-card .analysis-header { background: #450a0a; color: #FECACA; }
 
         .analysis-content {
             padding: 20px;
@@ -144,24 +138,9 @@
             color: #334155;
         }
         
-        /* Cleaning up the Bold text */
-        .analysis-content strong { 
-            color: #B91C1C; 
-            font-weight: 700; 
-        }
-
-        /* Cleaning up Lists */
-        .clean-list-item {
-            position: relative;
-            padding-left: 15px;
-            margin-bottom: 8px;
-        }
-        .clean-list-item::before {
-            content: "•";
-            position: absolute;
-            left: 0;
-            color: #9CA3AF;
-        }
+        .analysis-content strong { color: #B91C1C; font-weight: 700; }
+        .clean-list-item { position: relative; padding-left: 15px; margin-bottom: 8px; }
+        .clean-list-item::before { content: "•"; position: absolute; left: 0; color: #9CA3AF; }
 
         /* Footer */
         footer {
@@ -170,7 +149,6 @@
             box-sizing: border-box;
         }
 
-        /* Mobile Fixes */
         @media (max-width: 600px) {
             header { flex-direction: column; align-items: center; text-align: center; gap: 15px; padding-bottom: 15px; }
             h1 { font-size: 2rem; }
@@ -265,37 +243,69 @@
     </footer>
 
     <script>
-    // --- 1. Language & Data ---
-    const I18N = {
-        'en': { placeholder: "Paste dialogue here...", btn: "INITIATE SCAN", scanning: "PROCESSING...", labels: ['Aggression', 'Control', 'Narcissism', 'Insecurity', 'Envy', 'Gaslighting'], emotions: getEmotions('en') },
-        'fr': { placeholder: "Collez le dialogue ici...", btn: "LANCER L'ANALYSE", scanning: "TRAITEMENT...", labels: ['Agression', 'Contrôle', 'Narcissisme', 'Insécurité', 'Envie', 'Gaslighting'], emotions: getEmotions('fr') },
-        'zh_cn': { placeholder: "在此输入对话...", btn: "启动扫描", scanning: "分析中...", labels: ['攻击性', '操控欲', '自恋', '不安', '嫉妒', '煤气灯'], emotions: getEmotions('zh_cn') },
-        'zh_tw': { placeholder: "在此輸入對話...", btn: "啟動掃描", scanning: "分析中...", labels: ['攻擊性', '操控慾', '自戀', '不安', '嫉妒', '煤氣燈'], emotions: getEmotions('zh_tw') }
+    // --- 1. FULL DATA DICTIONARY (NO PLACEHOLDERS) ---
+    const FULL_DATA = {
+        'en': {
+            placeholder: "Paste dialogue here (e.g., 'I did it for your own good')...",
+            btn: "INITIATE SCAN",
+            scanning: "PROCESSING...",
+            labels: ['Aggression', 'Control', 'Narcissism', 'Insecurity', 'Envy', 'Gaslighting'],
+            emotions: [
+                { name: "Anger", color: "#EF4444", branches: [{name:"Hostility", children:["Hate","Scorn","Disgust"]}, {name:"Frustration", children:["Annoyed","Jealous","Agitated"]}, {name:"Threat", children:["Defensive","Nervous","Exposed"]}] },
+                { name: "Fear", color: "#F59E0B", branches: [{name:"Anxiety", children:["Overwhelmed","Worried","Panic"]}, {name:"Powerless", children:["Inferior","Fragile","Hopeless"]}, {name:"Rejected", children:["Lonely","Hurt","Shame"]}] },
+                { name: "Joy", color: "#10B981", branches: [{name:"Content", children:["Calm","Relaxed","Grateful"]}, {name:"Proud", children:["Confident","Success","Valued"]}, {name:"Connected", children:["Love","Trust","Empathy"]}] },
+                { name: "Sadness", color: "#3B82F6", branches: [{name:"Loss", children:["Empty","Grief","Regret"]}, {name:"Depressed", children:["Numb","Tired","Helpless"]}, {name:"Guilty", children:["Remorse","Ashamed","Sorry"]}] },
+                { name: "Surprise", color: "#8B5CF6", branches: [{name:"Confused", children:["Puzzled","Doubt","Hesitant"]}, {name:"Shocked", children:["Stunned","Chaos","Disbelief"]}, {name:"Excited", children:["Eager","Zealous","Impatient"]}] },
+                { name: "Disgust", color: "#6B7280", branches: [{name:"Aversion", children:["Sick","Avoid","Resist"]}, {name:"Disappointed", children:["Distant","Apathy","Give up"]}, {name:"Critical", children:["Picky","Blame","Despise"]}] }
+            ]
+        },
+        'fr': {
+            placeholder: "Collez le dialogue ici...",
+            btn: "LANCER L'ANALYSE",
+            scanning: "TRAITEMENT...",
+            labels: ['Agression', 'Contrôle', 'Narcissisme', 'Insécurité', 'Envie', 'Gaslighting'],
+            emotions: [
+                { name: "Colère", color: "#EF4444", branches: [{name:"Hostilité", children:["Haine","Mépris","Dégoût"]}, {name:"Frustration", children:["Agacé","Jaloux","Agité"]}, {name:"Menace", children:["Défensif","Nerveux","Exposé"]}] },
+                { name: "Peur", color: "#F59E0B", branches: [{name:"Anxiété", children:["Débordé","Inquiet","Panique"]}, {name:"Impuissance", children:["Inférieur","Fragile","Désespoir"]}, {name:"Rejeté", children:["Seul","Blessé","Honte"]}] },
+                { name: "Joie", color: "#10B981", branches: [{name:"Content", children:["Calme","Détendu","Reconnaissant"]}, {name:"Fier", children:["Confiant","Succès","Estimé"]}, {name:"Connecté", children:["Amour","Confiance","Empathie"]}] },
+                { name: "Tristesse", color: "#3B82F6", branches: [{name:"Perte", children:["Vide","Chagrin","Regret"]}, {name:"Déprimé", children:["Engourdi","Fatigué","Démuni"]}, {name:"Coupable", children:["Remords","Honteux","Désolé"]}] },
+                { name: "Surprise", color: "#8B5CF6", branches: [{name:"Confus", children:["Perplexe","Doute","Hésitant"]}, {name:"Choqué", children:["Sidéré","Chaos","Incrédule"]}, {name:"Excité", children:["Impatient","Zélé","Pressé"]}] },
+                { name: "Dégoût", color: "#6B7280", branches: [{name:"Aversion", children:["Malade","Éviter","Résister"]}, {name:"Déçu", children:["Distant","Apathie","Abandon"]}, {name:"Critique", children:["Pointilleux","Blâme","Mépris"]}] }
+            ]
+        },
+        'zh_cn': {
+            placeholder: "在此输入对话...",
+            btn: "启动扫描",
+            scanning: "分析中...",
+            labels: ['攻击性', '操控欲', '自恋', '不安', '嫉妒', '煤气灯'],
+            emotions: [
+                { name: "愤怒", color: "#EF4444", branches: [{name:"敌意", children:["憎恨","轻蔑","厌恶"]}, {name:"受挫", children:["烦躁","嫉妒","激动"]}, {name:"威胁", children:["防卫","不安","紧张"]}] },
+                { name: "恐惧", color: "#F59E0B", branches: [{name:"焦虑", children:["不知所措","担忧","恐慌"]}, {name:"无力", children:["自卑","脆弱","绝望"]}, {name:"被拒", children:["孤独","受伤","羞耻"]}] },
+                { name: "快乐", color: "#10B981", branches: [{name:"满足", children:["平静","放松","感恩"]}, {name:"自豪", children:["自信","成功","价值"]}, {name:"链接", children:["爱","信任","同理"]}] },
+                { name: "悲伤", color: "#3B82F6", branches: [{name:"失落", children:["空虚","悲痛","遗憾"]}, {name:"抑郁", children:["麻木","疲惫","无助"]}, {name:"愧疚", children:["自责","后悔","羞愧"]}] },
+                { name: "惊讶", color: "#8B5CF6", branches: [{name:"困惑", children:["不解","怀疑","犹豫"]}, {name:"震惊", children:["呆滞","混乱","难以置信"]}, {name:"兴奋", children:["期待","热切","急躁"]}] },
+                { name: "厌恶", color: "#6B7280", branches: [{name:"反感", children:["恶心","回避","抗拒"]}, {name:"失望", children:["幻灭","冷漠","放弃"]}, {name:"批判", children:["挑剔","指责","鄙视"]}] }
+            ]
+        },
+        'zh_tw': {
+            placeholder: "在此輸入對話...",
+            btn: "啟動掃描",
+            scanning: "分析中...",
+            labels: ['攻擊性', '操控慾', '自戀', '不安', '嫉妒', '煤氣燈'],
+            emotions: [
+                { name: "憤怒", color: "#EF4444", branches: [{name:"敵意", children:["憎恨","輕蔑","厭惡"]}, {name:"受挫", children:["煩躁","嫉妒","激動"]}, {name:"威脅", children:["防衛","不安","緊張"]}] },
+                { name: "恐懼", color: "#F59E0B", branches: [{name:"焦慮", children:["不知所措","擔憂","恐慌"]}, {name:"無力", children:["自卑","脆弱","絕望"]}, {name:"被拒", children:["孤獨","受傷","羞恥"]}] },
+                { name: "快樂", color: "#10B981", branches: [{name:"滿足", children:["平靜","放鬆","感恩"]}, {name:"自豪", children:["自信","成功","價值"]}, {name:"連結", children:["愛","信任","同理"]}] },
+                { name: "悲傷", color: "#3B82F6", branches: [{name:"失落", children:["空虛","悲痛","遺憾"]}, {name:"抑鬱", children:["麻木","疲憊","無助"]}, {name:"愧疚", children:["自責","後悔","羞愧"]}] },
+                { name: "驚訝", color: "#8B5CF6", branches: [{name:"困惑", children:["不解","懷疑","猶豫"]}, {name:"震驚", children:["呆滯","混亂","難以置信"]}, {name:"興奮", children:["期待","熱切","急躁"]}] },
+                { name: "厭惡", color: "#6B7280", branches: [{name:"反感", children:["噁心","迴避","抗拒"]}, {name:"失望", children:["幻滅","冷漠","放棄"]}, {name:"批判", children:["挑剔","指責","鄙視"]}] }
+            ]
+        }
     };
-
-    function getEmotions(lang) {
-        // Fallback structures
-        if(lang === 'zh_cn') return [
-            { name: "愤怒", color: "#EF4444", branches: [{name:"敌意", children:["憎恨","轻蔑"]}, {name:"受挫", children:["烦躁","嫉妒"]}, {name:"威胁", children:["防卫","不安"]}] },
-            { name: "恐惧", color: "#F59E0B", branches: [{name:"焦虑", children:["担忧","恐慌"]}, {name:"无力", children:["自卑","脆弱"]}, {name:"被拒", children:["受伤","羞耻"]}] },
-            { name: "快乐", color: "#10B981", branches: [{name:"满足", children:["平静","感恩"]}, {name:"自豪", children:["自信","价值"]}, {name:"链接", children:["爱","信任"]}] },
-            { name: "悲伤", color: "#3B82F6", branches: [{name:"失落", children:["空虚","遗憾"]}, {name:"抑郁", children:["麻木","无助"]}, {name:"愧疚", children:["自责","后悔"]}] },
-            { name: "惊讶", color: "#8B5CF6", branches: [{name:"困惑", children:["怀疑","犹豫"]}, {name:"震惊", children:["混乱","呆滞"]}, {name:"兴奋", children:["期待","急躁"]}] },
-            { name: "厌恶", color: "#6B7280", branches: [{name:"反感", children:["恶心","抗拒"]}, {name:"失望", children:["冷漠","放弃"]}, {name:"批判", children:["挑剔","鄙视"]}] }
-        ];
-        return [
-            { name: "憤怒", color: "#EF4444", branches: [{name:"敵意", children:["憎恨","輕蔑"]}, {name:"受挫", children:["煩躁","嫉妒"]}, {name:"威脅", children:["防衛","不安"]}] },
-            { name: "恐懼", color: "#F59E0B", branches: [{name:"焦慮", children:["擔憂","恐慌"]}, {name:"無力", children:["自卑","脆弱"]}, {name:"被拒", children:["受傷","羞恥"]}] },
-            { name: "快樂", color: "#10B981", branches: [{name:"滿足", children:["平靜","感恩"]}, {name:"自豪", children:["自信","價值"]}, {name:"連結", children:["愛","信任"]}] },
-            { name: "悲傷", color: "#3B82F6", branches: [{name:"失落", children:["空虛","遺憾"]}, {name:"抑鬱", children:["麻木","無助"]}, {name:"愧疚", children:["自責","後悔"]}] },
-            { name: "驚訝", color: "#8B5CF6", branches: [{name:"困惑", children:["懷疑","猶豫"]}, {name:"震驚", children:["混亂","呆滯"]}, {name:"興奮", children:["期待","急躁"]}] },
-            { name: "厭惡", color: "#6B7280", branches: [{name:"反感", children:["噁心","抗拒"]}, {name:"失望", children:["冷漠","放棄"]}, {name:"批判", children:["挑剔","鄙視"]}] }
-        ];
-    }
 
     // --- 2. Geometry Engine (Wheel) ---
     const SIZE = 800, CENTER = 400, R_CORE = 120, R_BRANCH = 250, R_LEAF = 380;
-    let currentLang = 'en', currentData = I18N['en'].emotions, activeIndex = null, chartInstance = null;
+    let currentLang = 'en', currentData = FULL_DATA['en'].emotions, activeIndex = null, chartInstance = null;
 
     function polarToCartesian(cx, cy, r, angle) {
         const rad = (angle - 90) * Math.PI / 180.0;
@@ -327,6 +337,8 @@
             const start = cur, end = cur + span; cur += span;
 
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
+            // Core
             const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("d", getPath(start, end, 0, R_CORE));
             p.setAttribute("fill", core.color);
@@ -334,6 +346,7 @@
             p.onclick = (e) => { e.stopPropagation(); activeIndex = (activeIndex===i)?null:i; renderWheel(); };
             g.appendChild(p);
 
+            // Label
             if (span > 20) {
                 const mid = start + span/2;
                 const pos = polarToCartesian(CENTER, CENTER, R_CORE*0.65, mid);
@@ -344,46 +357,85 @@
                 t.style.pointerEvents = "none";
                 g.appendChild(t);
             }
+
+            // Branches (2nd Layer)
+            if (isFoc) {
+                document.getElementById('centerMsg').style.opacity = '0';
+                const branches = core.branches;
+                const bSpan = span / branches.length;
+                branches.forEach((br, bi) => {
+                    const bStart = start + bi * bSpan, bEnd = bStart + bSpan;
+                    const bp = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    bp.setAttribute("d", getPath(bStart, bEnd, R_CORE, R_BRANCH));
+                    bp.setAttribute("fill", core.color); bp.setAttribute("fill-opacity", "0.85");
+                    g.appendChild(bp);
+
+                    const mid = bStart + bSpan/2;
+                    const pos = polarToCartesian(CENTER, CENTER, (R_CORE+R_BRANCH)/2, mid);
+                    const bt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    bt.setAttribute("x", pos.x); bt.setAttribute("y", pos.y);
+                    bt.setAttribute("text-anchor", "middle"); bt.setAttribute("dominant-baseline", "middle");
+                    bt.textContent = br.name; bt.style.fontSize = "16px"; bt.style.fill = "#FFF"; bt.style.pointerEvents = "none";
+                    let rot = mid; if(mid>90 && mid<270) rot+=180;
+                    bt.setAttribute("transform", `rotate(${rot}, ${pos.x}, ${pos.y})`);
+                    g.appendChild(bt);
+
+                    // Leaves (3rd Layer)
+                    const leaves = br.children;
+                    const lSpan = bSpan / leaves.length;
+                    leaves.forEach((lf, li) => {
+                        const lStart = bStart + li * lSpan, lEnd = lStart + lSpan;
+                        const lp = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        lp.setAttribute("d", getPath(lStart, lEnd, R_BRANCH, R_LEAF));
+                        lp.setAttribute("fill", core.color); lp.setAttribute("fill-opacity", "0.65");
+                        lp.onclick = (e) => { e.stopPropagation(); selectVector(core.name, br.name, lf); };
+                        g.appendChild(lp);
+
+                        const lMid = lStart + lSpan/2;
+                        const lPos = polarToCartesian(CENTER, CENTER, (R_BRANCH+R_LEAF)/2, lMid);
+                        const lt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        lt.setAttribute("x", lPos.x); lt.setAttribute("y", lPos.y);
+                        lt.setAttribute("text-anchor", "middle"); lt.setAttribute("dominant-baseline", "middle");
+                        lt.textContent = lf; lt.style.fontSize = "14px"; lt.style.fill = "#333"; lt.style.pointerEvents = "none";
+                        let lRot = lMid; if(lMid>90 && lMid<270) lRot+=180;
+                        lt.setAttribute("transform", `rotate(${lRot}, ${lPos.x}, ${lPos.y})`);
+                        g.appendChild(lt);
+                    });
+                });
+            }
             svg.appendChild(g);
         });
+        
+        if (activeIndex === null) document.getElementById('centerMsg').style.opacity = '0.5';
     }
 
-    // --- 3. THE "BRUTE FORCE" CLEANER ENGINE ---
+    function selectVector(core, branch, leaf) {
+        const path = `${core} > ${branch} > ${leaf}`;
+        document.getElementById('vectorDisplay').innerText = path;
+        document.getElementById('workspace').style.display = 'block';
+        document.getElementById('workspace').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- 3. THE "STRING SANITIZER" ENGINE ---
     function renderMarkdown(text) {
         if (!text) return "";
-        
-        // 1. Force Clean all existing symbols first
-        // Replace bold markers ** with nothing (we will infer boldness later if needed)
-        // Or better: Replace **Text** with <strong>Text</strong> and remove leftovers
-        let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
-        cleanText = cleanText.replace(/\*/g, ''); // Remove stray asterisks
-        
-        // 2. Split by Header Markers (###)
-        // This regex splits the text whenever it sees ###, ignoring whitespace
+        let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*/g, '');
         const parts = cleanText.split(/###\s*/);
-        
         let html = "";
         
         parts.forEach(part => {
             part = part.trim();
-            if (!part) return; // Skip empty parts
-            
-            // Extract Title (first line)
+            if (!part) return;
             const lines = part.split('\n');
-            let title = lines.shift().trim(); // First line is title
-            let content = lines.join('\n').trim(); // Rest is content
-            
+            const title = lines.shift().trim();
+            let content = lines.join('\n').trim();
             if (!title) return;
 
-            // SPECIAL LOGIC: If title contains "Truth" or "真實", make it RED
             const isTruth = title.toUpperCase().includes('TRUTH') || title.includes('真實');
             const cardClass = isTruth ? 'analysis-card truth-card' : 'analysis-card';
-
-            // 3. Format Lists (lines starting with - or •)
             content = content.replace(/^[-•]\s+(.*)$/gm, '<div class="clean-list-item">$1</div>');
             content = content.replace(/\n/g, '<br>');
 
-            // 4. Build the Clean Card
             html += `
             <div class="${cardClass}">
                 <div class="analysis-header">
@@ -392,7 +444,6 @@
                 <div class="analysis-content">${content}</div>
             </div>`;
         });
-        
         return html;
     }
 
@@ -402,7 +453,7 @@
         if (!text) return alert("Please enter text.");
         
         const btn = document.getElementById('scanBtn');
-        btn.innerText = I18N[currentLang].scanning; btn.disabled = true;
+        btn.innerText = FULL_DATA[currentLang].scanning; btn.disabled = true;
 
         try {
             const response = await fetch('/api/analyze', {
@@ -416,7 +467,6 @@
             document.getElementById('riskScore').innerText = `TOXIC SCORE: ${data.riskScore}/10`;
             document.getElementById('tagCloud').innerHTML = data.patterns.map(t => `<span class="tag">#${t}</span>`).join('');
             
-            // COMBINE & CLEAN
             const fullText = (data.explanation || "") + "\n\n### ⚔️ STRATEGY\n" + (data.strategicAdvice || "");
             document.getElementById('analysisText').innerHTML = renderMarkdown(fullText);
 
@@ -427,7 +477,7 @@
             console.error(e);
             alert("Analysis failed. Please try again.");
         } finally {
-            btn.innerText = I18N[currentLang].btn; btn.disabled = false;
+            btn.innerText = FULL_DATA[currentLang].btn; btn.disabled = false;
         }
     }
 
@@ -437,7 +487,7 @@
         chartInstance = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: I18N[currentLang].labels,
+                labels: FULL_DATA[currentLang].labels,
                 datasets: [{
                     label: 'Toxic Signature',
                     data: data,
@@ -466,14 +516,14 @@
         currentLang = l; 
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`l-${l}`).classList.add('active');
-        document.getElementById('dialogueInput').placeholder = I18N[l].placeholder;
-        document.getElementById('scanBtn').innerText = I18N[l].btn;
-        currentData = getEmotions(l); 
+        document.getElementById('dialogueInput').placeholder = FULL_DATA[l].placeholder;
+        document.getElementById('scanBtn').innerText = FULL_DATA[l].btn;
+        currentData = FULL_DATA[l].emotions; 
+        activeIndex = null; 
         renderWheel();
     }
 
     setLang('en');
-    renderWheel();
     
     document.querySelectorAll('.module-card').forEach((c,i) => {
         if(i>0) c.onclick = () => alert("This module is locked for the Research Cohort.");
