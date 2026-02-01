@@ -83,26 +83,27 @@ export default async function handler(req, res) {
         const config = LANG_CONFIG[safeLang] || LANG_CONFIG['en'];
 
         // ==========================================================================================
-        // 📚 THE 16-BOOK KNOWLEDGE BASE (Pure Logic, No Language Bias)
+        // 📚 THE 17-BOOK KNOWLEDGE BASE (Pure Logic, No Language Bias)
         // ==========================================================================================
         const knowledgeBase = `
         CORE KNOWLEDGE BASE:
-        1. "The Betrayal Bond" (Carnes)
-        2. "The Covert Passive-Aggressive Narcissist" (Mirza)
-        3. "Emotional Blackmail" (Forward)
-        4. "The Gaslight Effect" (Stern)
-        5. "The Body Keeps the Score" (van der Kolk)
-        6. "The Highly Sensitive Person" (Aron)
-        7. "Stop Walking on Eggshells" (Kreger)
-        8. "From Surviving to Thriving" (Walker)
-        9. "The Art of War" (Sun Tzu)
-        10. "The Book of Five Rings" (Musashi)
-        11. "Antifragile" (Taleb)
-        12. "What Every Body Is Saying" (Navarro)
-        13. "Thinking in Bets" (Duke)
-        14. "The Power of Silence"
-        15. "Asymmetric Warfare"
-        16. "The Gray Rock Method"
+        1. "The Betrayal Bond" (Patrick Carnes) - Trauma Bonding
+        2. "The Covert Passive-Aggressive Narcissist" (Debbie Mirza) - Hidden Toxicity
+        3. "In Sheep's Clothing" (George Simon) - Manipulative Characters
+        4. "Emotional Blackmail" (Susan Forward) - FOG (Fear, Obligation, Guilt)
+        5. "The Gaslight Effect" (Robin Stern) - Reality Distortion
+        6. "The Body Keeps the Score" (Bessel van der Kolk) - Somatic Memory
+        7. "The Highly Sensitive Person" (Elaine Aron) - Sensory Processing
+        8. "Stop Walking on Eggshells" (Randi Kreger) - Borderline/Narcissistic Dynamics
+        9. "From Surviving to Thriving" (Pete Walker) - CPTSD Flashbacks
+        10. "The Art of War" (Sun Tzu) - Asymmetric Warfare
+        11. "The Book of Five Rings" (Miyamoto Musashi) - Strategy & Timing
+        12. "Antifragile" (Nassim Taleb) - Stress Response
+        13. "What Every Body Is Saying" (Joe Navarro) - Non-verbal Decoding
+        14. "Thinking in Bets" (Annie Duke) - Decision Making
+        15. "The Power of Silence" - Tactical Pause
+        16. "Asymmetric Warfare" - Strategic Leverage
+        17. "The Gray Rock Method" - Supply Starvation
         `;
 
         // ==========================================================================================
@@ -119,12 +120,14 @@ export default async function handler(req, res) {
           INPUT TEXT: "${conversation}"
           USER CONTEXT: "${userEmotion || 'N/A'}"
           
+    
           *** STRICT OUTPUT RULES ***
           1. **LANGUAGE LOCK:** YOUR ENTIRE JSON OUTPUT MUST BE IN ${config.target}. 
              - If the target is French, keys remain English (like 'riskScore'), but VALUES must be French.
              - Do NOT mix languages.
           2. **HEADERS:** You MUST use the exact headers provided below in the explanation structure.
           3. **NO FLUFF:** Start directly with the diagnosis.
+          4. **REFERENCE CHECK:** You MUST apply the theories from Dr. Carnes, Debbie Mirza, and Dr. Simon explicitly where applicable.
 
           REQUIRED HEADERS (Use these EXACT strings in your Markdown):
           - ${config.headers.semantic}
