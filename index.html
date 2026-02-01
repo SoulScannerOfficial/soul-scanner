@@ -105,7 +105,7 @@
         .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 25px; }
         .tag { background: #F3F4F6; color: #374151; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; border: 1px solid #E5E5E5; }
 
-        /* ✨ AI CARD STYLING (OCD Friendly) ✨ */
+        /* ✨ AI CARD STYLING (CLEAN & STRUCTURED) ✨ */
         .analysis-card {
             background: white;
             border: 1px solid #E5E5E5;
@@ -113,38 +113,54 @@
             margin-bottom: 20px;
             overflow: hidden;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease-in;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .analysis-header {
             background: #1C1917; /* Dark header */
             color: #FFF9F2;
-            padding: 10px 15px;
+            padding: 12px 20px;
             font-weight: bold;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             display: flex; align-items: center; gap: 8px;
         }
+        
+        /* Special Style for Unpopular Truth */
+        .analysis-card.truth-card {
+            border: 1px solid #B91C1C;
+        }
+        .analysis-card.truth-card .analysis-header {
+            background: #450a0a; /* Dark Red */
+            color: #FECACA;
+        }
+
         .analysis-content {
             padding: 20px;
             font-size: 0.95rem;
             line-height: 1.7;
             color: #334155;
         }
+        
+        /* Cleaning up the Bold text */
         .analysis-content strong { 
-            color: #B91C1C; /* Highlight keywords in red */
+            color: #B91C1C; 
             font-weight: 700; 
         }
-        .list-item {
+
+        /* Cleaning up Lists */
+        .clean-list-item {
             position: relative;
-            padding-left: 20px;
+            padding-left: 15px;
             margin-bottom: 8px;
         }
-        .list-item::before {
+        .clean-list-item::before {
             content: "•";
             position: absolute;
             left: 0;
-            color: #B91C1C;
-            font-weight: bold;
+            color: #9CA3AF;
         }
 
         /* Footer */
@@ -267,7 +283,6 @@
             { name: "惊讶", color: "#8B5CF6", branches: [{name:"困惑", children:["怀疑","犹豫"]}, {name:"震惊", children:["混乱","呆滞"]}, {name:"兴奋", children:["期待","急躁"]}] },
             { name: "厌恶", color: "#6B7280", branches: [{name:"反感", children:["恶心","抗拒"]}, {name:"失望", children:["冷漠","放弃"]}, {name:"批判", children:["挑剔","鄙视"]}] }
         ];
-        // Default TW/EN structure
         return [
             { name: "憤怒", color: "#EF4444", branches: [{name:"敵意", children:["憎恨","輕蔑"]}, {name:"受挫", children:["煩躁","嫉妒"]}, {name:"威脅", children:["防衛","不安"]}] },
             { name: "恐懼", color: "#F59E0B", branches: [{name:"焦慮", children:["擔憂","恐慌"]}, {name:"無力", children:["自卑","脆弱"]}, {name:"被拒", children:["受傷","羞恥"]}] },
@@ -312,8 +327,6 @@
             const start = cur, end = cur + span; cur += span;
 
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            
-            // Core
             const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("d", getPath(start, end, 0, R_CORE));
             p.setAttribute("fill", core.color);
@@ -321,7 +334,6 @@
             p.onclick = (e) => { e.stopPropagation(); activeIndex = (activeIndex===i)?null:i; renderWheel(); };
             g.appendChild(p);
 
-            // Label
             if (span > 20) {
                 const mid = start + span/2;
                 const pos = polarToCartesian(CENTER, CENTER, R_CORE*0.65, mid);
@@ -336,40 +348,46 @@
         });
     }
 
-    // --- 3. Markdown Parser (THE CLEANUP CREW) ---
-    // This function acts as a translator to hide symbols and create cards
+    // --- 3. THE "BRUTE FORCE" CLEANER ENGINE ---
     function renderMarkdown(text) {
         if (!text) return "";
         
-        // 1. Split text into sections based on "###" headers
-        // We filter out empty splits to avoid blank cards
-        const sections = text.split('###').filter(section => section.trim().length > 0);
+        // 1. Force Clean all existing symbols first
+        // Replace bold markers ** with nothing (we will infer boldness later if needed)
+        // Or better: Replace **Text** with <strong>Text</strong> and remove leftovers
+        let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold
+        cleanText = cleanText.replace(/\*/g, ''); // Remove stray asterisks
+        
+        // 2. Split by Header Markers (###)
+        // This regex splits the text whenever it sees ###, ignoring whitespace
+        const parts = cleanText.split(/###\s*/);
         
         let html = "";
         
-        sections.forEach(section => {
-            section = section.trim();
-            // Separate Title (first line) from Content
-            const lines = section.split('\n');
-            const title = lines.shift().trim(); // First line is title
+        parts.forEach(part => {
+            part = part.trim();
+            if (!part) return; // Skip empty parts
+            
+            // Extract Title (first line)
+            const lines = part.split('\n');
+            let title = lines.shift().trim(); // First line is title
             let content = lines.join('\n').trim(); // Rest is content
             
-            // 2. Format Content: Remove symbols, add HTML
-            // Bold: **text** -> <strong>text</strong>
-            content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // Bullets: * text -> <div class="list-item">text</div>
-            // This regex finds lines starting with "* " and wraps them
-            content = content.replace(/^\*\s+(.*)$/gm, '<div class="list-item">$1</div>');
-            
-            // Line breaks
+            if (!title) return;
+
+            // SPECIAL LOGIC: If title contains "Truth" or "真實", make it RED
+            const isTruth = title.toUpperCase().includes('TRUTH') || title.includes('真實');
+            const cardClass = isTruth ? 'analysis-card truth-card' : 'analysis-card';
+
+            // 3. Format Lists (lines starting with - or •)
+            content = content.replace(/^[-•]\s+(.*)$/gm, '<div class="clean-list-item">$1</div>');
             content = content.replace(/\n/g, '<br>');
 
-            // 3. Wrap in Card Structure
+            // 4. Build the Clean Card
             html += `
-            <div class="analysis-card">
+            <div class="${cardClass}">
                 <div class="analysis-header">
-                   <span>🔍</span> ${title}
+                   ${isTruth ? '💀' : '👁️'} ${title}
                 </div>
                 <div class="analysis-content">${content}</div>
             </div>`;
@@ -394,19 +412,15 @@
             });
             const data = await response.json();
             
-            // Display Results
             document.getElementById('resultArea').style.display = 'block';
             document.getElementById('riskScore').innerText = `TOXIC SCORE: ${data.riskScore}/10`;
             document.getElementById('tagCloud').innerHTML = data.patterns.map(t => `<span class="tag">#${t}</span>`).join('');
             
-            // COMBINE EXPLANATION + STRATEGY
-            // Then pass through the Markdown Parser
-            const fullText = (data.explanation || "") + "\n\n" + (data.strategicAdvice || "");
+            // COMBINE & CLEAN
+            const fullText = (data.explanation || "") + "\n\n### ⚔️ STRATEGY\n" + (data.strategicAdvice || "");
             document.getElementById('analysisText').innerHTML = renderMarkdown(fullText);
 
-            // Radar Chart
             renderRadar(data.radarData);
-            
             setTimeout(() => { document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' }); }, 100);
 
         } catch (e) {
@@ -427,7 +441,7 @@
                 datasets: [{
                     label: 'Toxic Signature',
                     data: data,
-                    backgroundColor: 'rgba(185, 28, 28, 0.2)', // Red tint
+                    backgroundColor: 'rgba(185, 28, 28, 0.2)',
                     borderColor: '#B91C1C',
                     pointBackgroundColor: '#1C1917',
                     borderWidth: 2
@@ -454,15 +468,13 @@
         document.getElementById(`l-${l}`).classList.add('active');
         document.getElementById('dialogueInput').placeholder = I18N[l].placeholder;
         document.getElementById('scanBtn').innerText = I18N[l].btn;
-        currentData = getEmotions(l); // Update wheel data
+        currentData = getEmotions(l); 
         renderWheel();
     }
 
-    // Init
     setLang('en');
     renderWheel();
     
-    // Module Click Handlers
     document.querySelectorAll('.module-card').forEach((c,i) => {
         if(i>0) c.onclick = () => alert("This module is locked for the Research Cohort.");
     });
