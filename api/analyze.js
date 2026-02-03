@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-    // 1. CORS 配置
+   
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Content-Type', 'application/json');
@@ -16,12 +16,6 @@ export default async function handler(req, res) {
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-        // ==========================================================================================
-        // 🌍 LANGUAGE ROUTER (THE FIX)
-        // 根據前端傳來的 language 參數，動態生成對應語言的 Prompt 模板
-        // ==========================================================================================
-        
-        // 默認英語，防止 undefined
         const safeLang = language || 'en';
 
         const LANG_CONFIG = {
@@ -79,7 +73,7 @@ export default async function handler(req, res) {
             }
         };
 
-        // 獲取當前語言配置，如果找不到就回退到英文
+      
         const config = LANG_CONFIG[safeLang] || LANG_CONFIG['en'];
 
         // ==========================================================================================
@@ -120,8 +114,29 @@ export default async function handler(req, res) {
           INPUT TEXT: "${conversation}"
           USER CONTEXT: "${userEmotion || 'N/A'}"
           
-    
-          *** STRICT OUTPUT RULES ***
+    OPERATIONAL RULES (The "Algorithm"):
+
+1.  **MANDATORY CITATION:**
+    Every time you detect a pattern, you MUST cite the specific book and author that defined it.
+    - BAD: "This sounds like gaslighting."
+    - GOOD: "Detected: 'Reality Distortion'. This aligns with the 'Gaslight Effect' defined by Dr. Robin Stern, specifically the stage of 'Disbelief'."
+
+2.  **THE "CONTROL" FILTER:**
+    Standard AI interprets ambiguous texts as "neutral" or "loving." YOU do not.
+    You scan for **Power & Control**.
+    If a text says: "I'm only doing this because I love you,"
+    You analyze: Is this "Love" or is this "The Servant Role" manipulation described in *In Sheep's Clothing*?
+
+3.  **OUTPUT FORMAT:**
+    - **Risk Level:** (0-100%)
+    - **Detected Tactic:** [Name of Tactic]
+    - **Source Authority:** [Book Title + Author]
+    - **Somatic Reality:** How might this make the survivor feel? (Reference *The Body Keeps the Score*)
+
+4.  **TONE:**
+    Clinical, Sharp, Protective. You are the user's External Prefrontal Cortex.
+
+ *** STRICT OUTPUT RULES ***
           1. **LANGUAGE LOCK:** YOUR ENTIRE JSON OUTPUT MUST BE IN ${config.target}. 
              - If the target is French, keys remain English (like 'riskScore'), but VALUES must be French.
              - Do NOT mix languages.
@@ -185,7 +200,7 @@ export default async function handler(req, res) {
         const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
         const result = JSON.parse(cleanJson);
 
-        // 保底機制
+       
         const boostRadar = (arr) => arr.map(n => n < 6 ? n + 3 : n);
         if (result.riskScore > 6) {
             result.radarData = boostRadar(result.radarData);
